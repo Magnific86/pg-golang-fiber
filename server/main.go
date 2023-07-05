@@ -1,200 +1,73 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"syscall/js"
 
-	"github.com/Magnific86/pg-golang/server/models"
-	"github.com/Magnific86/pg-golang/server/storage"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
 )
 
-type Repository struct {
-	DB *gorm.DB
-}
-
-type Blob struct {
-	object *js.Value
-}
-
-type FormFile struct {
-	Blob
-	cur        int64
-	buffersize int64
-	size       int64
-}
-
 type Post struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	File    FormFile `json:"file"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
-func (r *Repository) CreatePost(context *fiber.Ctx) error {
-
-	postModel := new(Post)
-
-	file, errorFile := context.FormFile("file")
-
-	if errorFile != nil {
-		log.Fatal("failed to parse file")
-	}
-
-	err := context.BodyParser(postModel)
-
+func checkError(err error) {
 	if err != nil {
-		log.Fatal("failed to parse file")
+		log.Fatal("checkError: ", err)
 	}
-
-	postToPatch := Post{
-		Title:   "my title",
-		Content: "my content",
-		File:    *file,
-	}
-
-	if err != nil {
-		context.Status(http.StatusUnprocessableEntity).JSON(
-			&fiber.Map{"message": "request failed"})
-		return err
-	}
-
-	err = r.DB.Create(&postToPatch).Error
-	if err != nil {
-		context.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"message": "could not create post"})
-		return err
-	}
-
-	context.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Post has been added"})
-	return nil
 }
 
-func (r *Repository) DeletePost(context *fiber.Ctx) error {
-	postModel := models.Posts{}
-	id := context.Params("id")
-	if id == "" {
-		context.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-			"message": "id cannot be empty",
-		})
-		return nil
-	}
-
-	err := r.DB.Delete(postModel, id)
-
-	if err.Error != nil {
-		context.Status(http.StatusBadRequest).JSON(&fiber.Map{
-			"message": "could not delete Post",
-		})
-		return err.Error
-	}
-	context.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Post delete successfully",
-	})
-	return nil
+func getAllPosts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("success"))
 }
 
-func (r *Repository) GetPosts(context *fiber.Ctx) error {
-	posts := &[]models.Posts{}
-
-	err := r.DB.Find(posts).Error
-	if err != nil {
-		context.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"message": "could not get Posts"})
-		return err
-	}
-
-	context.Status(http.StatusOK).JSON(&fiber.Map{
-		"data": posts,
-	})
-	return nil
+func getPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("success"))
 }
 
-func (r *Repository) GetPost(context *fiber.Ctx) error {
-	id := context.Params("id")
-
-	if id == "" {
-		context.Status(http.StatusInternalServerError).JSON(&fiber.Map{
-			"message": "id cannot be empty",
-		})
-		return nil
-	}
-
-	fmt.Println("the ID is", id)
-
-	postModel := &models.Posts{}
-
-	err := r.DB.Where("id = ?", id).First(postModel).Error
-
-	if err != nil {
-		context.Status(http.StatusBadRequest).JSON(
-			&fiber.Map{"message": "could not get the Post"})
-		return err
-	}
-
-	context.Status(http.StatusOK).JSON(&fiber.Map{
-		"message": "Post id fetched successfully",
-		"data":    postModel,
-	})
-	return nil
+func createPost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("success"))
 }
 
-func (r *Repository) SetupRoutes(app *fiber.App) {
-	api := app.Group("/api")
-	api.Post("/create_post", r.CreatePost)
-	api.Delete("delete_post/:id", r.DeletePost)
-	api.Get("/posts/:id", r.GetPost)
-	api.Get("/posts", r.GetPosts)
+func deletePost(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Write([]byte("success"))
 }
 
 func main() {
-	err := godotenv.Load(".env")
+	e := godotenv.Load(".env")
+	checkError(e)
 
-	if err != nil {
-		log.Fatal("failed to load env vars", err)
+	connStr := fmt.Sprintf("host= %s port= %s user = %s password = %s dbname = %s sslmode=disable",
+		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASS"), os.Getenv("DB_NAME"))
+	db, e := sql.Open("postgres", connStr)
+	checkError(e)
+	defer db.Close()
+
+	r := mux.NewRouter()
+	r.Use(mux.CORSMethodMiddleware(r))
+	r.HandleFunc("/posts", getAllPosts).Methods("GET")
+	r.HandleFunc("/posts/{id}", getPost).Methods("GET")
+	r.HandleFunc("/create_post", createPost).Methods("POST")
+	r.HandleFunc("/delete_post/{id}", createPost).Methods("DELETE")
+
+	srv := &http.Server{
+		Handler: r,
+		Addr:    "127.0.0.1:8000",
 	}
 
-	config := &storage.Config{
-		Host:     os.Getenv("DB_HOST"),
-		Port:     os.Getenv("DB_PORT"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASS"),
-		SSLMode:  os.Getenv("DB_SSLMODE"),
-		DBName:   os.Getenv("DB_NAME"),
-	}
+	checkError(srv.ListenAndServe())
 
-	db, err := storage.NewConnection(config)
+	http.ListenAndServe(":8080", r)
 
-	if err != nil {
-		log.Fatal("failed to set db connection", err)
-	}
-
-	err = models.MigratePosts(db)
-
-	if err != nil {
-		log.Fatal("failed to migrate db")
-	}
-
-	r := Repository{
-		DB: db,
-	}
-
-	app := fiber.New()
-
-	app.Use(cors.New())
-
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
-
-	r.SetupRoutes(app)
-
-	app.Listen(":8080")
+	fmt.Println("fmsdrgbid")
 }
