@@ -5,9 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"syscall/js"
 
-	"github.com/Magnific86/pg-golang/models"
-	"github.com/Magnific86/pg-golang/storage"
+	"github.com/Magnific86/pg-golang/server/models"
+	"github.com/Magnific86/pg-golang/server/storage"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
@@ -18,15 +19,44 @@ type Repository struct {
 	DB *gorm.DB
 }
 
+type Blob struct {
+	object *js.Value
+}
+
+type FormFile struct {
+	Blob
+	cur        int64
+	buffersize int64
+	size       int64
+}
+
 type Post struct {
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Title   string   `json:"title"`
+	Content string   `json:"content"`
+	File    FormFile `json:"file"`
 }
 
 func (r *Repository) CreatePost(context *fiber.Ctx) error {
+
 	postModel := new(Post)
 
+	file, errorFile := context.FormFile("file")
+
+	if errorFile != nil {
+		log.Fatal("failed to parse file")
+	}
+
 	err := context.BodyParser(postModel)
+
+	if err != nil {
+		log.Fatal("failed to parse file")
+	}
+
+	postToPatch := Post{
+		Title:   "my title",
+		Content: "my content",
+		File:    *file,
+	}
 
 	if err != nil {
 		context.Status(http.StatusUnprocessableEntity).JSON(
@@ -34,7 +64,7 @@ func (r *Repository) CreatePost(context *fiber.Ctx) error {
 		return err
 	}
 
-	err = r.DB.Create(&postModel).Error
+	err = r.DB.Create(&postToPatch).Error
 	if err != nil {
 		context.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"message": "could not create post"})

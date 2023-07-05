@@ -1,4 +1,4 @@
-module github.com/Magnific86/pg-golang
+module github.com/Magnific86/pg-golang/server
 
 go 1.20
 

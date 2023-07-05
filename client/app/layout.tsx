@@ -1,5 +1,7 @@
 import Link from "next/link"
 import "./globals.css"
+import { ToastContainer } from "react-toastify"
+
 export const meta = <title>my title name</title>
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Link href={"/posts/create"}>Create new post</Link>
         </nav>
         {children}
+        <ToastContainer />
       </body>
     </html>
   )

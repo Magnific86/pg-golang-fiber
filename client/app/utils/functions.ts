@@ -15,12 +15,16 @@ export const getPosts = async () => {
 export const createPost = async obj => {
   const config = {
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "multipart/form-data",
     },
   }
-  const body = JSON.stringify(obj)
+  const formData = new FormData()
+  formData.append("title", obj.title)
+  formData.append("content", obj.content)
+  formData.append("file", obj.file)
+
   try {
-    return await axios.post(`${API_BASE_URL}/create_post`, body, config)
+    return await axios.post(`${API_BASE_URL}/create_post`, formData, config)
   } catch (e) {
     return e
   }
@@ -39,5 +43,14 @@ export const deletePost = async (id: string) => {
     return await axios.delete(`${API_BASE_URL}/delete_post/${id}`)
   } catch (e) {
     return e
+  }
+}
+
+export const clearFileInput = ctrl => {
+  try {
+    ctrl.value = null
+  } catch (ex) {}
+  if (ctrl.value) {
+    ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl)
   }
 }
