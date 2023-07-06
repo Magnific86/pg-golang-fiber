@@ -1,17 +1,17 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
-import { IPost } from "../utils/types"
+import { useEffect, useState } from "react"
+import { IPostWithId } from "../utils/types"
 import { getPosts } from "../utils/functions"
 import { PostItem } from "../utils/PostItem"
 
 const AllPostsPage = () => {
-  const [posts, setPosts] = useState<IPost[]>([])
+  const [posts, setPosts] = useState<IPostWithId[]>([])
 
   const getPostsHandler = () => {
     getPosts().then(result => {
       if (result.status === 200) {
-        setPosts(result.data.data)
+        setPosts(result.data)
       }
     })
   }

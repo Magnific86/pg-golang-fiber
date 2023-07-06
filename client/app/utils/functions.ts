@@ -15,16 +15,19 @@ export const getPosts = async () => {
 export const createPost = async obj => {
   const config = {
     headers: {
-      "Content-Type": "multipart/form-data",
+      // "Content-Type": "multipart/form-data",
+      "Content-Type": "application/json",
     },
   }
-  const formData = new FormData()
-  formData.append("title", obj.title)
-  formData.append("content", obj.content)
-  formData.append("file", obj.file)
+  // const formData = new FormData()
+  // formData.append("title", obj.title)
+  // formData.append("content", obj.content)
+  // formData.append("file", obj.file)
+
+  const body = JSON.stringify(obj)
 
   try {
-    return await axios.post(`${API_BASE_URL}/create_post`, formData, config)
+    return await axios.post(`${API_BASE_URL}/create_post`, body, config)
   } catch (e) {
     return e
   }
@@ -39,8 +42,17 @@ export const getCurrentPost = async (id: string) => {
 }
 
 export const deletePost = async (id: string) => {
+  const config = {
+    headers: {
+      "Access-Control-Allow-Origin' ": "*",
+      "Content-Type": "application/json",
+      "Access-Control-Request-Method": "DELETE",
+      "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE",
+      "Access-Control-Allow-Headers": "X-Requested-With, content-type",
+    },
+  }
   try {
-    return await axios.delete(`${API_BASE_URL}/delete_post/${id}`)
+    return await axios.delete(`${API_BASE_URL}/delete_post/${id}`, config)
   } catch (e) {
     return e
   }

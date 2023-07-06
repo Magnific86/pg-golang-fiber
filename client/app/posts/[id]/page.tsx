@@ -18,12 +18,10 @@ const PostItemPage = () => {
     })
   }, [])
 
-  console.log("params: ", params)
-
   return (
     <>
       {post?.content && post.title && params.id ? (
-        <PostItem id={params.id} title={post?.title} content={post?.content} file={post.file} />
+        <PostItem id={params.id} title={post?.title} content={post?.content} />
       ) : (
         <p>failed to load post</p>
       )}

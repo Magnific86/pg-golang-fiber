@@ -1,4 +1,4 @@
-module github.com/Magnific86/pg-golang/server
+module github.com/Magnific86/pg-golang-fiber/server-fiber
 
 go 1.20
 

@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"syscall/js"
 
-	"github.com/Magnific86/pg-golang/server/models"
-	"github.com/Magnific86/pg-golang/server/storage"
+	"github.com/Magnific86/pg-golang-fiber/server-fiber/models"
+	"github.com/Magnific86/pg-golang-fiber/server-fiber/storage"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
@@ -19,32 +18,14 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-type Blob struct {
-	object *js.Value
-}
-
-type FormFile struct {
-	Blob
-	cur        int64
-	buffersize int64
-	size       int64
-}
-
 type Post struct {
-	Title   string   `json:"title"`
-	Content string   `json:"content"`
-	File    FormFile `json:"file"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
 func (r *Repository) CreatePost(context *fiber.Ctx) error {
 
-	postModel := new(Post)
-
-	file, errorFile := context.FormFile("file")
-
-	if errorFile != nil {
-		log.Fatal("failed to parse file")
-	}
+	var postModel Post
 
 	err := context.BodyParser(postModel)
 
@@ -55,7 +36,6 @@ func (r *Repository) CreatePost(context *fiber.Ctx) error {
 	postToPatch := Post{
 		Title:   "my title",
 		Content: "my content",
-		File:    *file,
 	}
 
 	if err != nil {
