@@ -8,12 +8,13 @@ import React, { useEffect, useState } from "react"
 
 const PostItemPage = () => {
   const [post, setPost] = useState<IPost>()
+
   const params = useParams()
 
   useEffect(() => {
     getCurrentPost(params?.id).then(result => {
       if (result.status == 200) {
-        setPost(result.data.data)
+        setPost(result.data)
       }
     })
   }, [])

@@ -49,7 +49,6 @@ func getFirstParam(path string) (ps string) {
 var db *sql.DB
 
 func getAllPosts(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	queryStr := "select * from Posts"
 
@@ -81,7 +80,6 @@ func getAllPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func getPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	queryStr := "select * from Posts where id = $1"
 
@@ -99,7 +97,6 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	var postModel Post
 
@@ -120,8 +117,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func deletePost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().
 
 	queryStr := "delete from Posts where id = $1"
 
@@ -146,22 +141,14 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
-	r.HandleFunc("/posts", getAllPosts).Methods("GET")
-	r.HandleFunc("/posts/{id}", getPost).Methods("GET")
-	r.HandleFunc("/create_post", createPost).Methods("POST")
-	r.HandleFunc("/delete_post/{id}", deletePost).Methods("DELETE")
-
-	// srv := &http.Server{
-	// 	Handler: r,
-	// 	Addr:    "127.0.0.1:8000",
-	// }
-
-	// checkError(srv.ListenAndServe())
-
-	// checkError(http.ListenAndServe(":8080", r))
+	r.HandleFunc("/posts", getAllPosts)
+	r.HandleFunc("/posts/{id}", getPost)
+	r.HandleFunc("/create_post", createPost)
+	r.HandleFunc("/delete_post/{id}", deletePost)
 
 	checkError(http.ListenAndServe(":8080",
 		handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS", "DELETE"}),
 			handlers.AllowedOrigins([]string{"*"}))(r)))
+
 }

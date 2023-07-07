@@ -44,11 +44,11 @@ export const getCurrentPost = async (id: string) => {
 export const deletePost = async (id: string) => {
   const config = {
     headers: {
-      "Access-Control-Allow-Origin' ": "*",
+      // "Access-Control-Allow-Origin' ": "*",
       "Content-Type": "application/json",
-      "Access-Control-Request-Method": "DELETE",
-      "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE",
-      "Access-Control-Allow-Headers": "X-Requested-With, content-type",
+      // "Access-Control-Request-Method": "DELETE",
+      // "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE",
+      // "Access-Control-Allow-Headers": "X-Requested-With, content-type",
     },
   }
   try {
