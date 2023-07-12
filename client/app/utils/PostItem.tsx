@@ -18,6 +18,7 @@ export const PostItem: FC<IPostProps> = ({ id, title, content }) => {
   const deletePostHandler = () => {
     deletePost(id).then(result => {
       if (result.status == 200 && window) {
+        window.location.reload()
         router.push(`${BASE_URL}/posts`)
       }
     })

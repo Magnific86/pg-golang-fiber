@@ -11,7 +11,7 @@ const AllPostsPage = () => {
   const getPostsHandler = () => {
     getPosts().then(result => {
       if (result.status === 200) {
-        setPosts(result.data)
+        setPosts(result.data) //.data for server-fiber
       }
     })
   }

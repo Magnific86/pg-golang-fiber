@@ -33,18 +33,13 @@ func (r *Repository) CreatePost(context *fiber.Ctx) error {
 		log.Fatal("failed to parse file")
 	}
 
-	postToPatch := Post{
-		Title:   "my title",
-		Content: "my content",
-	}
-
 	if err != nil {
 		context.Status(http.StatusUnprocessableEntity).JSON(
 			&fiber.Map{"message": "request failed"})
 		return err
 	}
 
-	err = r.DB.Create(&postToPatch).Error
+	err = r.DB.Create(&postModel).Error
 	if err != nil {
 		context.Status(http.StatusBadRequest).JSON(
 			&fiber.Map{"message": "could not create post"})
@@ -134,7 +129,7 @@ func (r *Repository) SetupRoutes(app *fiber.App) {
 }
 
 func main() {
-	err := godotenv.Load(".env")
+	err := godotenv.Load("../.env")
 
 	if err != nil {
 		log.Fatal("failed to load env vars", err)

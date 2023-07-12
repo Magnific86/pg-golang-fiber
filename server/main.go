@@ -128,7 +128,7 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	e := godotenv.Load(".env")
+	e := godotenv.Load("../.env")
 	checkError(e)
 
 	connStr := fmt.Sprintf("host= %s port= %s user = %s password = %s dbname = %s sslmode=disable",
@@ -141,10 +141,12 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
-	r.HandleFunc("/posts", getAllPosts)
-	r.HandleFunc("/posts/{id}", getPost)
-	r.HandleFunc("/create_post", createPost)
-	r.HandleFunc("/delete_post/{id}", deletePost)
+	r.HandleFunc("/api/posts", getAllPosts)
+	r.HandleFunc("/api/posts/{id}", getPost)
+	r.HandleFunc("/api/create_post", createPost)
+	r.HandleFunc("/api/delete_post/{id}", deletePost)
+
+	// r.PathPrefix("/api").Subrouter()
 
 	checkError(http.ListenAndServe(":8080",
 		handlers.CORS(handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
